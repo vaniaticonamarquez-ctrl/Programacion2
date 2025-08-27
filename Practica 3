@@ -1,0 +1,43 @@
+import math
+
+
+class Estadistica:
+
+    def promedio(self, valores):
+        suma = 0
+
+        for valor in valores:
+            suma += valor
+
+        return suma / len(valores)
+
+    def desviacion(self, valores):
+        promedio = self.promedio(valores)
+        suma_cuadrados = 0
+
+        for valor in valores:
+            suma_cuadrados += (valor - promedio) ** 2
+
+        return math.sqrt(suma_cuadrados / (len(valores) - 1))
+
+
+estadistica = Estadistica()
+
+# [1.9, 2.5, 3.7, 2, 1,6,3,4,5,2]
+
+valores = []
+
+print(
+    "Por favor ingrese los valores para calcular el promedio y la desviacion estandard"
+)
+
+while len(valores) < 10:
+    valor = float(input("ingrese el valor: "))
+
+    valores.append(valor)
+
+promedio = estadistica.promedio(valores)
+desviacion = estadistica.desviacion(valores)
+
+print(f"El promedio es {promedio}")
+print(f"El desviacion estandard {desviacion}")
