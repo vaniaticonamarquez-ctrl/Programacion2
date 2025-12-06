@@ -1,28 +1,113 @@
-class Zoologico {
+class Charango implements Serializable {
+    String material;
+    int nroCuerdas;
+    boolean[] cuerdas = new boolean[10]; 
 
-    int id;
-    String nombre;
-    int nroAnimales;
-    Animal animales[] = new Animal[30];
+    public Charango(String material, boolean[] cuerdas) {
+        this.material = material;
+        this.cuerdas = cuerdas;
+        this.nroCuerdas = cuerdas.length;
+    } 
 
-    public Zoologico(int id, String nombre) {
-        this.id = id;
-        this.nombre = nombre;
-        this.nroAnimales = 0;
-    }
+    public void mostrar() {
+        System.out.println("Material: " + material + " | Cuerdas: " + nroCuerdas);
+    }
+} 
 
-    public void agregarAnimal(Animal a) {
-        if (nroAnimales < 30) {
-            animales[nroAnimales++] = a;
-        }
-    }
+class ArchivoCharango {
+    String nombre = "charangos.dat"; 
 
-    public int variedad() {
-        return nroAnimales;
-    }
+    public void guardar(Charango c) {
+        try {
+            FileOutputStream fos = new FileOutputStream(nombre, true);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(c);
+            oos.close();
+        } catch (Exception e) {}
+    } 
 
-    @Override
-    public String toString() {
-        return "Zoo " + id + " - " + nombre + " | Variedad: " + nroAnimales;
-    }
+    private ArrayList<Charango> leerTodos() {
+        ArrayList<Charango> lista = new ArrayList<>(); 
+
+        try {
+            FileInputStream fis = new FileInputStream(nombre); 
+
+            while (fis.available() > 0) {
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                lista.add((Charango) ois.readObject());
+            } 
+
+        } catch (Exception e) {} 
+
+        return lista;
+    } 
+
+    private void escribirTodos(ArrayList<Charango> lista) {
+        try {
+            FileOutputStream fos = new FileOutputStream(nombre);
+            for (Charango c : lista) {
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(c);
+            }
+        } catch (Exception e) {}
+    } 
+
+    // b) Eliminar charangos con más de 6 cuerdas false
+    public void eliminarCuerdasFalseMayor6() {
+        ArrayList<Charango> lista = leerTodos();
+        ArrayList<Charango> nueva = new ArrayList<>(); 
+
+        for (Charango c : lista) {
+            int cont = 0;
+            for (boolean b : c.cuerdas) if (!b) cont++;
+            if (cont <= 6) nueva.add(c);
+        } 
+
+        escribirTodos(nueva);
+    } 
+
+    // c) Listar charangos de material x
+    public void listarPorMaterial(String m) {
+        for (Charango c : leerTodos()) {
+            if (c.material.equalsIgnoreCase(m)) c.mostrar();
+        }
+    } 
+
+    // d) Buscar charangos con 10 cuerdas
+    public void buscarDiezCuerdas() {
+        for (Charango c : leerTodos()) {
+            if (c.nroCuerdas == 10) c.mostrar();
+        }
+    } 
+
+    // e) Ordenar por material alfabéticamente
+    public void ordenarPorMaterial() {
+        ArrayList<Charango> lista = leerTodos(); 
+
+        lista.sort((a, b) -> a.material.compareToIgnoreCase(b.material)); 
+
+        escribirTodos(lista);
+    }
+} 
+
+public class Main1 {
+    public static void main(String[] args) { 
+
+        ArchivoCharango arch = new ArchivoCharango(); 
+
+        boolean[] cuerdas1 = {true,true,true,true,false,false,true,false,true,true};
+        boolean[] cuerdas2 = {true,true,true,true,true,true,true,true,true,true}; 
+
+        arch.guardar(new Charango("Nogal", cuerdas1));
+        arch.guardar(new Charango("Roble", cuerdas2)); 
+
+        System.out.println("LISTA MATERIAL ROBLE:");
+        arch.listarPorMaterial("Roble"); 
+
+        System.out.println("CHARANGOS DE 10 CUERDAS:");
+        arch.buscarDiezCuerdas(); 
+
+        arch.eliminarCuerdasFalseMayor6();
+        arch.ordenarPorMaterial();
+    }
 }
