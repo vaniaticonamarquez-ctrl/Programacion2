@@ -111,3 +111,1407 @@ public class Main1 {
         arch.ordenarPorMaterial();
     }
 }
+EJERCICIO 2
+class Trabajador implements Serializable {
+    String nombre;
+    String cargo;
+    double salario;
+    public Trabajador(String nombre, String cargo, double salario) {
+        this.nombre = nombre; this.cargo = cargo; this.salario = salario;
+    }
+    public String toString() {
+        return nombre + " | " + cargo + " | " + salario;
+    }
+} 
+
+class ArchivoTrabajador {
+    private final String arch = "trabajadores.dat"; 
+
+    // lee la lista completa (si no existe devuelve lista vacía)
+    private ArrayList<Trabajador> leer() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(arch))) {
+            return (ArrayList<Trabajador>) ois.readObject();
+        } catch (Exception e) { return new ArrayList<>(); }
+    } 
+
+    private void escribir(ArrayList<Trabajador> lista) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(arch))) {
+            oos.writeObject(lista);
+        } catch (Exception e) { e.printStackTrace(); }
+    } 
+
+    public void guardar(Trabajador t) {
+        ArrayList<Trabajador> l = leer();
+        l.add(t);
+        escribir(l);
+    } 
+
+    public void aumentarSalario(String nombre, double monto) {
+        ArrayList<Trabajador> l = leer();
+        for (Trabajador t : l) if (t.nombre.equalsIgnoreCase(nombre)) t.salario += monto;
+        escribir(l);
+    } 
+
+    public Trabajador trabajadorMayorSalario() {
+        ArrayList<Trabajador> l = leer();
+        if (l.isEmpty()) return null;
+        Trabajador max = l.get(0);
+        for (Trabajador t : l) if (t.salario > max.salario) max = t;
+        return max;
+    } 
+
+    public void ordenarPorSalario() {
+        ArrayList<Trabajador> l = leer();
+        l.sort(Comparator.comparingDouble(tr -> tr.salario));
+        escribir(l);
+    } 
+
+    // utilidad para mostrar todos
+    public void mostrarTodos() {
+        for (Trabajador t : leer()) System.out.println(t);
+    }
+}
+EJERCICIO 3
+class Producto implements Serializable {
+    int codigo;
+    String nombre;
+    double precio;
+    public Producto(int codigo, String nombre, double precio) {
+        this.codigo = codigo; this.nombre = nombre; this.precio = precio;
+    }
+    public String toString() { return codigo + " | " + nombre + " | " + precio; }
+} 
+
+class ArchivoProducto {
+    private final String arch = "productos.dat"; 
+
+    private ArrayList<Producto> leer() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(arch))) {
+            return (ArrayList<Producto>) ois.readObject();
+        } catch (Exception e) { return new ArrayList<>(); }
+    }
+    private void escribir(ArrayList<Producto> lista) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(arch))) {
+            oos.writeObject(lista);
+        } catch (Exception e) { e.printStackTrace(); }
+    } 
+
+    public void guardarProducto(Producto p) {
+        ArrayList<Producto> l = leer();
+        l.add(p);
+        escribir(l);
+    } 
+
+    public Producto buscaProducto(int codigo) {
+        for (Producto p : leer()) if (p.codigo == codigo) return p;
+        return null;
+    } 
+
+    public double promedioPrecios() {
+        ArrayList<Producto> l = leer(); if (l.isEmpty()) return 0;
+        double s = 0; for (Producto p : l) s += p.precio;
+        return s / l.size();
+    } 
+
+    public Producto productoMasCaro() {
+        ArrayList<Producto> l = leer(); if (l.isEmpty()) return null;
+        Producto max = l.get(0);
+        for (Producto p : l) if (p.precio > max.precio) max = p;
+        return max;
+    }
+}
+EJERCICIO 4
+class Estudiante implements Serializable {
+    int ru, edad;
+    String nombre, paterno, materno;
+    public Estudiante(int ru, String nombre, String paterno, String materno, int edad) {
+        this.ru = ru; this.nombre = nombre; this.paterno = paterno; this.materno = materno; this.edad = edad;
+    }
+    public String toString() { return ru + " | " + nombre + " " + paterno + " " + materno + " | " + edad; }
+} 
+
+class Nota implements Serializable {
+    String materia;
+    double notaFinal;
+    Estudiante estudiante;
+    public Nota(String materia, double notaFinal, Estudiante estudiante) {
+        this.materia = materia; this.notaFinal = notaFinal; this.estudiante = estudiante;
+    }
+    public String toString() { return estudiante.nombre + " | " + materia + " | " + notaFinal; }
+} 
+
+class ArchiNota {
+    private final String arch = "notas.dat";
+    private ArrayList<Nota> leer() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(arch))) {
+            return (ArrayList<Nota>) ois.readObject();
+        } catch (Exception e) { return new ArrayList<>(); }
+    }
+    private void escribir(ArrayList<Nota> l) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(arch))) {
+            oos.writeObject(l);
+        } catch (Exception e) { e.printStackTrace(); }
+    } 
+
+    public void agregarNota(Nota n) { ArrayList<Nota> l = leer(); l.add(n); escribir(l); } 
+
+    public double promedioNotas() {
+        ArrayList<Nota> l = leer();
+        if (l.isEmpty()) return 0;
+        double s = 0; for (Nota n : l) s += n.notaFinal; return s / l.size();
+    } 
+
+    public ArrayList<Nota> mejoresNotas() {
+        ArrayList<Nota> l = leer(); ArrayList<Nota> res = new ArrayList<>();
+        double max = -1;
+        for (Nota n : l) if (n.notaFinal > max) max = n.notaFinal;
+        for (Nota n : l) if (n.notaFinal == max) res.add(n);
+        return res;
+    } 
+
+    public void eliminarMateria(String materia) {
+        ArrayList<Nota> l = leer();
+        l.removeIf(n -> n.materia.equalsIgnoreCase(materia));
+        escribir(l);
+    }
+} EJERCICIO 5 
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List; 
+
+class ArchFarmacia { 
+
+    private String nombreArchivo; 
+
+    public ArchFarmacia(String na) {
+        nombreArchivo = na;
+    } 
+
+    public void crearArchivo(List<Farmacia> lista) throws Exception {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(nombreArchivo))) {
+            oos.writeObject(lista);
+        }
+    } 
+
+    @SuppressWarnings("unchecked")
+    public List<Farmacia> leer() throws Exception {
+        File f = new File(nombreArchivo);
+        if (!f.exists()) {
+            return new ArrayList<>();
+        }
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(nombreArchivo))) {
+            return (List<Farmacia>) ois.readObject();
+        }
+    } 
+
+    // a) Mostrar medicamentos para la tos en sucursal X
+    public void mostrarMedicamentosTos(int suc) throws Exception {
+        List<Farmacia> lista = leer();
+        for (Farmacia f : lista) {
+            if (f.getSucursal() == suc) {
+                System.out.println("Medicamentos para tos en sucursal " + suc + ":");
+                f.mostrarMedicamentosTipo(1);
+                return;
+            }
+        }
+        System.out.println("Sucursal " + suc + " no encontrada.");
+    } 
+
+    // b) Mostrar sucursal y dirección donde está TapSin
+    public void mostrarSucursalConTapsin() throws Exception {
+        List<Farmacia> lista = leer();
+        boolean encontrado = false;
+        for (Farmacia f : lista) {
+            Medicamento m = f.buscarMedicamento("Tapsin");
+            if (m != null) {
+                System.out.println(f);
+                encontrado = true;
+            }
+        }
+        if (!encontrado) {
+            System.out.println("(Tapsin no encontrado en ninguna sucursal)");
+        }
+    } 
+
+    // c) Buscar medicamentos por tipo
+    public void buscarMedicamentosPorTipo(int tipo) throws Exception {
+        List<Farmacia> lista = leer();
+        for (Farmacia f : lista) {
+            System.out.println("Sucursal " + f.getSucursal() + " – Tipo " + tipo + ":");
+            f.mostrarMedicamentosTipo(tipo);
+        }
+    } 
+
+    // d) Ordenar farmacias por dirección
+    public void ordenarPorDireccion() throws Exception {
+        List<Farmacia> lista = leer();
+        lista.sort(Comparator.comparing(Farmacia::getDireccion, Comparator.nullsFirst(String::compareTo)));
+        for (Farmacia f : lista) {
+            System.out.println(f);
+        }
+    } 
+
+    // e) Mover medicamentos de tipo X de farmacia A a farmacia Z
+    public void moverMedicamentos(int tipo, int sucA, int sucZ) throws Exception {
+        List<Farmacia> lista = leer();
+        Farmacia a = null, z = null;
+        for (Farmacia f : lista) {
+            if (f.getSucursal() == sucA) {
+                a = f;
+            }
+            if (f.getSucursal() == sucZ) {
+                z = f;
+            }
+        }
+        if (a == null) {
+            System.out.println("Sucursal origen " + sucA + " no encontrada.");
+            return;
+        }
+        if (z == null) {
+            System.out.println("Sucursal destino " + sucZ + " no encontrada.");
+            return;
+        }
+        a.moverMedicamentosTipo(tipo, z);
+        crearArchivo(lista);
+    }
+}
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List; 
+
+/**
+*
+* @author HP-RYZEN 5
+*/
+//Nicol Yanina Ticona Aduviri
+//CI: 6786427
+class Farmacia implements Serializable { 
+
+    private static final long serialVersionUID = 1L;
+    private String nombreFarmacia;
+    private int sucursal;
+    private String direccion;
+    private List<Medicamento> medicamentos = new ArrayList<>(); 
+
+    public Farmacia(String n, int s, String d) {
+        nombreFarmacia = n;
+        sucursal = s;
+        direccion = d;
+    } 
+
+    public void agregarMedicamento(Medicamento m) {
+        if (m != null) {
+            medicamentos.add(m);
+        }
+    } 
+
+    public String getDireccion() {
+        return direccion;
+    } 
+
+    public int getSucursal() {
+        return sucursal;
+    } 
+
+    public List<Medicamento> getMedicamentos() {
+        return medicamentos;
+    } 
+
+    public Medicamento buscarMedicamento(String nom) {
+        if (nom == null) {
+            return null;
+        }
+        for (Medicamento m : medicamentos) {
+            if (m != null && nom.equalsIgnoreCase(m.getNombre())) {
+                return m;
+            }
+        }
+        return null;
+    } 
+
+    public void mostrarMedicamentosTipo(int tipo) {
+        boolean found = false;
+        for (Medicamento m : medicamentos) {
+            if (m != null && m.getTipo() == tipo) {
+                System.out.println("  " + m);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("  (ninguno)");
+        }
+    } 
+
+    public void moverMedicamentosTipo(int tipo, Farmacia destino) {
+        if (destino == null) {
+            return;
+        }
+        Iterator<Medicamento> it = medicamentos.iterator();
+        while (it.hasNext()) {
+            Medicamento m = it.next();
+            if (m != null && m.getTipo() == tipo) {
+                destino.agregarMedicamento(m);
+                it.remove(); // elimina correctamente de la lista origen
+            }
+private String nombre;
+    private int cod;
+    private int tipo;
+    private double precio; 
+
+    public Medicamento(String nombre, int cod, int tipo, double precio) {
+        this.nombre = nombre;
+        this.cod = cod;
+        this.tipo = tipo;
+        this.precio = precio;
+    } 
+
+    public String getNombre() {
+        return nombre;
+    } 
+
+    public int getCodigo() {
+        return cod;
+    } 
+
+    public int getTipo() {
+        return tipo;
+    } 
+
+    public double getPrecio() {
+        return precio;
+    } 
+
+    @Override
+    public String toString() {
+        return nombre + " (cod=" + cod + ", tipo=" + tipo + ", precio=" + precio + ")";
+    }
+} 
+EJERCICIO 6 
+
+package com.mycompany.practica3_presistencia; 
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set; 
+
+class ArchBiblioteca { 
+
+    private String nombreArchivo; 
+
+    public ArchBiblioteca(String nombreArchivo) {
+        this.nombreArchivo = nombreArchivo;
+    } 
+
+    public void guardar(List<Libro> libros, List<Cliente> clientes, List<Prestamo> prestamos) throws Exception {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(nombreArchivo))) {
+            oos.writeObject(libros);
+            oos.writeObject(clientes);
+            oos.writeObject(prestamos);
+        }
+    } 
+
+    @SuppressWarnings("unchecked")
+    public ListaDatos leer() throws Exception {
+        File f = new File(nombreArchivo);
+        if (!f.exists()) {
+            // archivo no existe -> devolver listas vacías en vez de lanzar excepción
+            return new ListaDatos(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        }
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(nombreArchivo))) {
+            List<Libro> libros = (List<Libro>) ois.readObject();
+            List<Cliente> clientes = (List<Cliente>) ois.readObject();
+            List<Prestamo> prestamos = (List<Prestamo>) ois.readObject();
+            return new ListaDatos(
+                    libros != null ? libros : new ArrayList<>(),
+                    clientes != null ? clientes : new ArrayList<>(),
+                    prestamos != null ? prestamos : new ArrayList<>()
+            );
+        }
+    } 
+
+    // a) Listar los libros cuyo precio estén entre x e y
+    public void listarLibrosEntre(double x, double y) throws Exception {
+        ListaDatos ld = leer();
+        System.out.println("Libros con precio entre " + x + " y " + y + ":");
+        boolean found = false;
+        for (Libro l : ld.libros) {
+            if (l.getPrecio() >= x && l.getPrecio() <= y) {
+                System.out.println(" - " + l);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println(" (ninguno)");
+        }
+        System.out.println();
+    } 
+
+    // b) Calcular ingreso total generado por un libro específico (por código)
+    public void ingresoTotalPorLibro(int codLibro) throws Exception {
+        ListaDatos ld = leer();
+        double ingreso = 0;
+        Libro libro = null;
+        for (Libro l : ld.libros) {
+            if (l.getCodLibro() == codLibro) {
+                libro = l;
+                break;
+            }
+        }
+        if (libro == null) {
+            System.out.println("Libro no encontrado: " + codLibro + "\n");
+            return;
+        }
+        for (Prestamo p : ld.prestamos) {
+            if (p.getCodLibro() == codLibro) {
+                ingreso += p.getCantidad() * libro.getPrecio();
+            }
+        }
+        System.out.println("Ingreso total por libro '" + libro.getTitulo() + "' = " + ingreso + "\n");
+    } 
+
+    // c) Mostrar la lista de libros que nunca fueron prestados
+    public void listarLibrosNuncaPrestados() throws Exception {
+        ListaDatos ld = leer();
+        Set<Integer> vendidos = new HashSet<>();
+        for (Prestamo p : ld.prestamos) {
+            vendidos.add(p.getCodLibro());
+        }
+        System.out.println("Libros nunca prestados:");
+        boolean found = false;
+        for (Libro l : ld.libros) {
+            if (!vendidos.contains(l.getCodLibro())) {
+                System.out.println(" - " + l);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println(" (ninguno)");
+        }
+        System.out.println();
+    } 
+
+    // d) Mostrar todos los clientes que prestaron un libro específico
+    public void clientesQueCompraronLibro(int codLibro) throws Exception {
+        ListaDatos ld = leer();
+        Set<Integer> codClientes = new LinkedHashSet<>();
+        for (Prestamo p : ld.prestamos) {
+            if (p.getCodLibro() == codLibro) {
+                codClientes.add(p.getCodCliente());
+            }
+        }
+        System.out.println("Clientes que prestaron el libro cod=" + codLibro + ":");
+        boolean found = false;
+        for (Cliente c : ld.clientes) {
+            if (codClientes.contains(c.getCodCliente())) {
+                System.out.println(" - " + c);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println(" (ninguno)");
+        }
+        System.out.println();
+    } 
+
+    // e) Definir el libro más prestado (por cantidad total)
+    public void libroMasPrestado() throws Exception {
+        ListaDatos ld = leer();
+        if (ld.prestamos.isEmpty()) {
+            System.out.println("No hay prestamos.\n");
+            return;
+        }
+        Map<Integer, Integer> contador = new HashMap<>(); // codLibro -> total cantidad
+        for (Prestamo p : ld.prestamos) {
+            contador.put(p.getCodLibro(), contador.getOrDefault(p.getCodLibro(), 0) + p.getCantidad());
+        }
+        int mejorCod = -1;
+        int max = -1;
+        for (Map.Entry<Integer, Integer> e : contador.entrySet()) {
+            if (e.getValue() > max) {
+                max = e.getValue();
+                mejorCod = e.getKey();
+            }
+        }
+        if (mejorCod == -1) {
+            System.out.println("No hay prestamos.\n");
+            return;
+        }
+        for (Libro l : ld.libros) {
+            if (l.getCodLibro() == mejorCod) {
+                System.out.println("Libro más prestado: " + l + " (cantidad prestada total=" + max + ")\n");
+                return;
+            }
+        }
+        System.out.println("Libro más prestado (código " + mejorCod + ") no está en la lista de libros.\n");
+    } 
+
+    // f) Mostrar el cliente que tuvo más préstamos (por número de registros de préstamo)
+    public void clienteConMasPrestamos() throws Exception {
+        ListaDatos ld = leer();
+        if (ld.prestamos.isEmpty()) {
+            System.out.println("No hay prestamos.\n");
+            return;
+        }
+        Map<Integer, Integer> contador = new HashMap<>(); // codCliente -> num prestamos
+        for (Prestamo p : ld.prestamos) {
+            contador.put(p.getCodCliente(), contador.getOrDefault(p.getCodCliente(), 0) + 1);
+        }
+        int mejor = -1, codMejor = -1;
+        for (Map.Entry<Integer, Integer> e : contador.entrySet()) {
+            if (e.getValue() > mejor) {
+                mejor = e.getValue();
+                codMejor = e.getKey();
+            }
+        }
+        if (codMejor == -1) {
+            System.out.println("No hay prestamos.\n");
+            return;
+        }
+        for (Cliente c : ld.clientes) {
+            if (c.getCodCliente() == codMejor) {
+                System.out.println("Cliente con más préstamos: " + c + " (nPrestamos=" + mejor + ")\n");
+                return;
+            }
+        }
+        System.out.println("Cliente con más préstamos (código " + codMejor + ") no está en la lista de clientes.\n");
+    } 
+
+    static class ListaDatos { 
+
+        List<Libro> libros;
+        List<Cliente> clientes;
+        List<Prestamo> prestamos; 
+
+        ListaDatos(List<Libro> l, List<Cliente> c, List<Prestamo> p) {
+            libros = l;
+            clientes = c;
+            prestamos = p;
+        }
+    } 
+
+}
+class Cliente implements Serializable { 
+
+    private static final long serialVersionUID = 1L;
+    private int codCliente;
+    private String ci;
+    private String nombre;
+    private String apellido; 
+
+    public Cliente(int codCliente, String ci, String nombre, String apellido) {
+        this.codCliente = codCliente;
+        this.ci = ci;
+        this.nombre = nombre;
+        this.apellido = apellido;
+    } 
+
+    public int getCodCliente() {
+        return codCliente;
+    } 
+
+    @Override
+    public String toString() {
+        return nombre + " " + apellido + " (codCliente=" + codCliente + ")";
+    }
+}
+class Prestamo implements Serializable { 
+
+    private static final long serialVersionUID = 1L;
+    private int codCliente;
+    private int codLibro;
+    private Date fechaPrestamo;
+    private int cantidad; 
+
+    public Prestamo(int codCliente, int codLibro, Date fechaPrestamo, int cantidad) {
+        this.codCliente = codCliente;
+        this.codLibro = codLibro;
+        this.fechaPrestamo = fechaPrestamo;
+        this.cantidad = cantidad;
+    } 
+
+    public int getCodCliente() {
+        return codCliente;
+    } 
+
+    public int getCodLibro() {
+        return codLibro;
+    } 
+
+    public int getCantidad() {
+        return cantidad;
+    } 
+
+    @Override
+    public String toString() {
+        return "Prestamo[cCliente=" + codCliente + ", cLibro=" + codLibro + ", cantidad=" + cantidad + "]";
+    }
+}
+EJERCICIO 7 
+
+public class ArchNiño { 
+
+    private String archivo; 
+
+    public ArchNiño(String archivo) {
+        this.archivo = archivo;
+    } 
+
+    public void guardar(List<Niño> lista) throws Exception {
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(archivo));
+        oos.writeObject(lista);
+        oos.close();
+    } 
+
+    @SuppressWarnings("unchecked")
+    public List<Niño> leer() throws Exception {
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivo));
+        List<Niño> lista = (List<Niño>) ois.readObject();
+        ois.close();
+        return lista;
+    }
+    // b) Peso adecuado segun talla y edad (criterio ejemplo) 
+
+    public void contarPesoAdecuado() throws Exception {
+        List<Niño> lista = leer();
+        int cont = 0;
+        for (Niño n : lista) {
+            double ideal = n.getEdad() * 2.5; // criterio ejemplo
+            if (Math.abs(n.getPeso() - ideal) <= 3) {
+                cont++;
+            }
+        }
+        System.out.println("Niños con peso adecuado: " + cont + "\n");
+    } 
+
+// c) Mostrar niños con peso inadecuado
+    public void mostrarInadecuados() throws Exception {
+        List<Niño> lista = leer();
+        System.out.println("Niños con peso/talla inadecuada:");
+        for (Niño n : lista) {
+            double ideal = n.getEdad() * 2.5;
+            if (Math.abs(n.getPeso() - ideal) > 3) {
+                System.out.println(" - " + n);
+            }
+        }
+        System.out.println();
+    }
+    // d) Promedio edad 
+
+    public void promedioEdad() throws Exception {
+        List<Niño> lista = leer();
+        double sum = 0;
+        for (Niño n : lista) {
+            sum += n.getEdad();
+        }
+        System.out.println("Promedio de edad = " + (sum / lista.size()) + "\n");
+    } 
+
+// e) Buscar niño por carnet
+    public void buscarPorCI(int ci) throws Exception {
+        for (Niño n : leer()) {
+            if (n.ci == ci) {
+                System.out.println("Encontrado: " + n + "\n");
+                return;
+            }
+        }
+        System.out.println("No encontrado CI=" + ci + "\n");
+    } 
+
+// f) Mostrar niños con la talla más alta
+    public void tallaMasAlta() throws Exception {
+        List<Niño> lista = leer();
+        String maxT = "";
+        for (Niño n : lista) {
+            if (n.getTalla().compareTo(maxT) > 0) {
+                maxT = n.getTalla();
+            }
+        }
+        System.out.println("Niños con talla más alta (" + maxT + "):");
+        for (Niño n : lista) {
+            if (n.getTalla().equals(maxT)) {
+                System.out.println(" - " + n);
+            }
+        }
+        System.out.println();
+    }
+}
+class Niño extends Persona { 
+
+    private int edad;
+    private double peso;
+    private String talla; 
+
+    public Niño(String nombre, String apPat, String apMat, int ci, int edad, double peso, String talla) {
+        this.nombre = nombre;
+        this.apellidoPaterno = apPat;
+        this.apellidoMaterno = apMat;
+        this.ci = ci;
+        this.edad = edad;
+        this.peso = peso;
+        this.talla = talla;
+    } 
+
+    public int getEdad() {
+        return edad;
+    } 
+
+    public double getPeso() {
+        return peso;
+    } 
+
+    public String getTalla() {
+        return talla;
+    } 
+
+    @Override
+    public String toString() {
+        return nombre + " " + apellidoPaterno + " (CI=" + ci + ", edad=" + edad + ", peso=" + peso + ", talla=" + talla + ")";
+    }
+}
+import java.io.*;
+import java.util.*; 
+
+class Persona implements Serializable { 
+
+    protected String nombre;
+    protected String apellidoPaterno;
+    protected String apellidoMaterno;
+    protected int ci;
+}
+Ejercicio 8 
+
+import java.util.*;
+import java.text.SimpleDateFormat; 
+
+class Alimento { 
+
+    String nombre;
+    String fechaVencimiento;
+    int cantidad; 
+
+    public Alimento(String nombre, String fechaVencimiento, int cantidad) {
+        this.nombre = nombre;
+        this.fechaVencimiento = fechaVencimiento;
+        this.cantidad = cantidad;
+    } 
+
+    @Override
+    public String toString() {
+        return nombre + " | Vence: " + fechaVencimiento + " | Cantidad: " + cantidad;
+    }
+}
+class ArchReFri { 
+
+    String nombre;
+    ArrayList<Alimento> lista = new ArrayList<>(); 
+
+    public ArchReFri(String nombre) {
+        this.nombre = nombre;
+    } 
+
+    // a) Crear
+    public void crear(Alimento a) {
+        lista.add(a);
+    } 
+
+    // a) Modificar por nombre
+    public void modificar(String nombre, String nuevaFecha, int nuevaCantidad) {
+        for (Alimento a : lista) {
+            if (a.nombre.equalsIgnoreCase(nombre)) {
+                a.fechaVencimiento = nuevaFecha;
+                a.cantidad = nuevaCantidad;
+            }
+        }
+    } 
+
+    // a) Eliminar por nombre
+    public void eliminar(String nombre) {
+        lista.removeIf(a -> a.nombre.equalsIgnoreCase(nombre));
+    } 
+
+    // b) Mostrar alimentos que caducaron antes de fecha X
+    public void mostrarCaducadosAntes(String fechaX) {
+        System.out.println("\n*** Caducados antes de " + fechaX + " ***");
+        for (Alimento a : lista) {
+            if (a.fechaVencimiento.compareTo(fechaX) < 0) {
+                System.out.println(a);
+            }
+        }
+    } 
+
+    // c) Eliminar los que tengan cantidad 0
+    public void eliminarCantidadCero() {
+        lista.removeIf(a -> a.cantidad == 0);
+    } 
+
+    // d) Buscar alimentos ya vencidos (fecha < hoy)
+    public void buscarVencidos() {
+        System.out.println("\n*** Alimentos vencidos ***");
+        String hoy = "2025-01-01"; // ejemplo fijo para que siempre funcione
+        for (Alimento a : lista) {
+            if (a.fechaVencimiento.compareTo(hoy) < 0) {
+                System.out.println(a);
+            }
+        }
+    } 
+
+    // e) Mostrar el alimento con más cantidad
+    public void mayorCantidad() {
+        System.out.println("\n*** Alimento con mayor cantidad ***");
+        if (lista.isEmpty()) {
+            return;
+        } 
+
+        Alimento max = lista.get(0);
+        for (Alimento a : lista) {
+            if (a.cantidad > max.cantidad) {
+                max = a;
+            }
+        }
+        System.out.println(max);
+    } 
+
+    // Mostrar todo (solo para pruebas)
+    public void mostrarTodo() {
+        System.out.println("\n--- Lista completa ---");
+        for (Alimento a : lista) {
+            System.out.println(a);
+        }
+    }
+}
+
+Ejercicio 9
+import java.util.*; 
+
+class Animal { 
+
+    String especie;
+    String nombre;
+    int cantidad; 
+
+    public Animal(String especie, String nombre, int cantidad) {
+        this.especie = especie;
+        this.nombre = nombre;
+        this.cantidad = cantidad;
+    } 
+
+    @Override
+    public String toString() {
+        return especie + " - " + nombre + " | Cant: " + cantidad;
+    }
+}
+class ArchZoo { 
+
+    String nombre;
+    ArrayList<Zoologico> lista = new ArrayList<>(); 
+
+    public ArchZoo(String nombre) {
+        this.nombre = nombre;
+    } 
+
+    // a) Crear
+    public void crear(Zoologico z) {
+        lista.add(z);
+    } 
+
+    // a) Modificar
+    public void modificar(int id, String nuevoNombre) {
+        for (Zoologico z : lista) {
+            if (z.id == id) {
+                z.nombre = nuevoNombre;
+            }
+        }
+    } 
+
+    // a) Eliminar
+    public void eliminar(int id) {
+        lista.removeIf(z -> z.id == id);
+    } 
+
+    // b) Zoológicos con mayor variedad
+    public void listarMayorVariedad() {
+        System.out.println("\n*** Zoológicos con mayor variedad ***");
+        if (lista.isEmpty()) {
+            return;
+        } 
+
+        int max = 0;
+        for (Zoologico z : lista) {
+            if (z.variedad() > max) {
+                max = z.variedad();
+            }
+        } 
+
+        for (Zoologico z : lista) {
+            if (z.variedad() == max) {
+                System.out.println(z);
+            }
+        }
+    } 
+
+    // c) Zoológicos vacíos y eliminarlos
+    public void eliminarVacios() {
+        System.out.println("\n*** Eliminando zoológicos vacíos ***");
+        for (Zoologico z : lista) {
+            if (z.nroAnimales == 0) {
+                System.out.println("Eliminado: " + z.nombre);
+            }
+        }
+        lista.removeIf(z -> z.nroAnimales == 0);
+    } 
+
+    // d) Mostrar animales especie X
+    public void mostrarEspecie(String especie) {
+        System.out.println("\n*** Animales de especie: " + especie + " ***");
+        for (Zoologico z : lista) {
+            for (int i = 0; i < z.nroAnimales; i++) {
+                if (z.animales[i].especie.equalsIgnoreCase(especie)) {
+                    System.out.println("En zoo " + z.nombre + ": " + z.animales[i]);
+                }
+            }
+        }
+    } 
+
+    // e) Mover animales de zoo X a Y
+    public void moverAnimales(int x, int y) {
+        Zoologico zx = null, zy = null; 
+
+        for (Zoologico z : lista) {
+            if (z.id == x) {
+                zx = z;
+            }
+            if (z.id == y) {
+                zy = z;
+            }
+        } 
+
+        if (zx == null || zy == null) {
+            return;
+        } 
+
+        System.out.println("\n*** Moviendo animales de " + zx.nombre + " a " + zy.nombre + " ***"); 
+
+        for (int i = 0; i < zx.nroAnimales; i++) {
+            zy.agregarAnimal(zx.animales[i]);
+        }
+        zx.nroAnimales = 0; // quedó vacío
+    } 
+
+    // Mostrar general
+    public void mostrarTodo() {
+        System.out.println("\n--- Zoológicos ---");
+        for (Zoologico z : lista) {
+            System.out.println(z);
+            for (int i = 0; i < z.nroAnimales; i++) {
+                System.out.println("   - " + z.animales[i]);
+            }
+        }
+    }
+}
+class Zoologico { 
+
+    int id;
+    String nombre;
+    int nroAnimales;
+    Animal animales[] = new Animal[30]; 
+
+    public Zoologico(int id, String nombre) {
+        this.id = id;
+        this.nombre = nombre;
+        this.nroAnimales = 0;
+    } 
+
+    public void agregarAnimal(Animal a) {
+        if (nroAnimales < 30) {
+            animales[nroAnimales++] = a;
+        }
+    } 
+
+    public int variedad() {
+        return nroAnimales;
+    } 
+
+    @Override
+    public String toString() {
+        return "Zoo " + id + " - " + nombre + " | Variedad: " + nroAnimales;
+    }
+}
+EJERCICIO 10
+class ArchCobros { 
+
+    String archivo = "cobros_nfc.txt"; 
+
+    public void guardar(CobroNFC c) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(archivo, true))) {
+            pw.println(c.toString());
+        } catch (Exception e) {
+        }
+    } 
+
+    public void mostrar() {
+        System.out.println("\n--- COBROS NFC ---");
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                CobroNFC c = CobroNFC.from(l);
+                System.out.println(c.id + " | $" + c.monto + " | " + c.fecha);
+            }
+        } catch (Exception e) {
+        }
+    } 
+
+    public void buscar(String id) {
+        System.out.println("\nBuscando transacción: " + id);
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                CobroNFC c = CobroNFC.from(l);
+                if (c.id.equalsIgnoreCase(id)) {
+                    System.out.println("Encontrada → " + c.id + " | $" + c.monto + " | " + c.fecha);
+                    return;
+                }
+            }
+        } catch (Exception e) {
+        }
+        System.out.println("No encontrada.");
+    }
+} 
+
+class ArchDataset { 
+
+    String archivo = "dataset.txt"; 
+
+    public void guardar(Dataset d) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(archivo, true))) {
+            pw.println(d.toString());
+        } catch (Exception e) {
+        }
+    } 
+
+    public void mostrar() {
+        System.out.println("\n--- DATASETS ---");
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                Dataset d = Dataset.from(l);
+                System.out.println(d.nombre + " | Inst: " + d.instancias + " | Algoritmo: " + d.algoritmo);
+            }
+        } catch (Exception e) {
+        }
+    } 
+
+    public void buscar(String n) {
+        System.out.println("\nBuscando dataset: " + n);
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                Dataset d = Dataset.from(l);
+                if (d.nombre.equalsIgnoreCase(n)) {
+                    System.out.println("Encontrado → " + d.nombre + " | " + d.instancias + " | " + d.algoritmo);
+                    return;
+                }
+            }
+            System.out.println("No encontrado.");
+        } catch (Exception e) {
+        }
+    }
+}
+class ArchJugadores { 
+
+    String archivo = "jugadores.txt"; 
+
+    public void guardar(Jugador j) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(archivo, true))) {
+            pw.println(j.toString());
+        } catch (Exception e) {
+        }
+    } 
+
+    public void mostrar() {
+        System.out.println("\n--- JUGADORES ---");
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                Jugador j = Jugador.from(l);
+                System.out.println("Nombre: " + j.nombre + " | Nivel: " + j.nivel + " | Puntaje: " + j.puntaje);
+            }
+        } catch (Exception e) {
+        }
+    } 
+
+    public void buscar(String nombre) {
+        System.out.println("\nBuscando: " + nombre);
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                Jugador j = Jugador.from(l);
+                if (j.nombre.equalsIgnoreCase(nombre)) {
+                    System.out.println("Encontrado → " + j.nombre + " | Nivel: " + j.nivel + " | Puntaje: " + j.puntaje);
+                    return;
+                }
+            }
+            System.out.println("No encontrado.");
+        } catch (Exception e) {
+        }
+    }
+} 
+
+class ArchUsuariosSeg { 
+
+    String archivo = "usuarios_seguro.txt"; 
+
+    public void guardar(UsuarioSeg u) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(archivo, true))) {
+            pw.println(u.toString());
+        } catch (Exception e) {
+        }
+    } 
+
+    public void mostrar() {
+        System.out.println("\n--- USUARIOS (CIFRADOS) ---");
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                UsuarioSeg u = UsuarioSeg.from(l);
+                System.out.println("Usuario: " + u.usuario + " | Pass: " + u.password);
+            }
+        } catch (Exception e) {
+        }
+    } 
+
+    public void buscar(String nombre) {
+        System.out.println("\nBuscando usuario: " + nombre);
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                UsuarioSeg u = UsuarioSeg.from(l);
+                if (u.usuario.equalsIgnoreCase(nombre)) {
+                    System.out.println("Encontrado → " + u.usuario + " | " + u.password);
+                    return;
+                }
+            }
+        } catch (Exception e) {
+        }
+        System.out.println("No encontrado.");
+    }
+} 
+
+class ArchWiFi { 
+
+    String archivo = "dispositivos_wifi.txt"; 
+
+    public void guardar(DispositivoWiFi d) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(archivo, true))) {
+            pw.println(d.toString());
+        } catch (Exception e) {
+        }
+    } 
+
+    public void mostrar() {
+        System.out.println("\n--- DISPOSITIVOS WIFI ---");
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                DispositivoWiFi d = DispositivoWiFi.from(l);
+                System.out.println(d.mac + " | " + d.nombre + " | " + d.velocidad + " Mbps");
+            }
+        } catch (Exception e) {
+        }
+    } 
+
+    public void buscar(String mac) {
+        System.out.println("\nBuscando MAC: " + mac);
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                DispositivoWiFi d = DispositivoWiFi.from(l);
+                if (d.mac.equalsIgnoreCase(mac)) {
+                    System.out.println("Encontrado → " + d.mac + " | " + d.nombre + " | " + d.velocidad + " Mbps");
+                    return;
+                }
+            }
+        } catch (Exception e) {
+        }
+        System.out.println("No encontrado.");
+    }
+} 
+
+class ArchEmpresas { 
+
+    String archivo = "empresas.txt"; 
+
+    public void guardar(Empresa e) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(archivo, true))) {
+            pw.println(e.toString());
+        } catch (Exception ex) {
+        }
+    } 
+
+    public void mostrar() {
+        System.out.println("\n--- EMPRESAS ---");
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                Empresa e = Empresa.from(l);
+                System.out.println(e.nombre + " | " + e.rubro + " | Emp: " + e.empleados);
+            }
+        } catch (Exception ex) {
+        }
+    } 
+
+    public void buscar(String nombre) {
+        System.out.println("\nBuscando empresa: " + nombre);
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String l;
+            while ((l = br.readLine()) != null) {
+                Empresa e = Empresa.from(l);
+                if (e.nombre.equalsIgnoreCase(nombre)) {
+                    System.out.println("Encontrada → " + e.nombre + " | " + e.rubro + " | Emp: " + e.empleados);
+                    return;
+                }
+            }
+        } catch (Exception ex) {
+        }
+        System.out.println("No encontrada.");
+    }
+}
+class CobroNFC { 
+
+    String id;
+    double monto;
+    String fecha; 
+
+    public CobroNFC(String i, double m, String f) {
+        id = i;
+        monto = m;
+        fecha = f;
+    } 
+
+    public String toString() {
+        return id + "," + monto + "," + fecha;
+    } 
+
+    public static CobroNFC from(String s) {
+        String[] p = s.split(",");
+        return new CobroNFC(p[0], Double.parseDouble(p[1]), p[2]);
+    } 
+
+class Dataset { 
+
+    String nombre;
+    int instancias;
+    String algoritmo; 
+
+    public Dataset(String n, int i, String a) {
+        nombre = n;
+        instancias = i;
+        algoritmo = a;
+    } 
+
+    public String toString() {
+        return nombre + "," + instancias + "," + algoritmo;
+    } 
+
+    public static Dataset from(String s) {
+        String[] p = s.split(",");
+        return new Dataset(p[0], Integer.parseInt(p[1]), p[2]);
+    }
+}
+class DispositivoWiFi { 
+
+    String mac;
+    String nombre;
+    int velocidad; 
+
+    public DispositivoWiFi(String m, String n, int v) {
+        mac = m;
+        nombre = n;
+        velocidad = v;
+    } 
+
+    public String toString() {
+        return mac + "," + nombre + "," + velocidad;
+    } 
+
+    public static DispositivoWiFi from(String s) {
+        String[] p = s.split(",");
+        return new DispositivoWiFi(p[0], p[1], Integer.parseInt(p[2]));
+    }
+}
+class Empresa { 
+
+    String nombre;
+    String rubro;
+    int empleados; 
+
+    public Empresa(String n, String r, int e) {
+        nombre = n;
+        rubro = r;
+        empleados = e;
+    } 
+
+    public String toString() {
+        return nombre + "," + rubro + "," + empleados;
+    } 
+
+    public static Empresa from(String s) {
+        String[] p = s.split(",");
+        return new Empresa(p[0], p[1], Integer.parseInt(p[2]));
+    }
+}
+class Jugador { 
+
+    String nombre;
+    int nivel;
+    int puntaje; 
+
+    public Jugador(String n, int lv, int pts) {
+        nombre = n;
+        nivel = lv;
+        puntaje = pts;
+    } 
+
+    public String toString() {
+        return nombre + "," + nivel + "," + puntaje;
+    } 
+
+    public static Jugador from(String s) {
+        String[] p = s.split(",");
+        return new Jugador(p[0], Integer.parseInt(p[1]), Integer.parseInt(p[2]));
+    }
+}
+class UsuarioSeg { 
+
+    String usuario;
+    String password; 
+
+    public UsuarioSeg(String u, String p) {
+        usuario = u;
+        password = p;
+    } 
+
+    public String toString() {
+        return usuario + "," + password;
+    } 
+
+    public static UsuarioSeg from(String s) {
+        String[] p = s.split(",");
+        return new UsuarioSeg(p[0], p[1]);
+    }
+}
