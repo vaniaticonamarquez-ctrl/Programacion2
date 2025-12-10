@@ -1,389 +1,309 @@
-package programa;
+package com.mycompany.fin;
 
-public class Main {
-    public static void main(String[] args) {
-        Consultorio cons = new Consultorio("archivosConsultas", "archivosMedicos");
+public class Consulta {
+    private int ci;
+    private String nomPaciente;
+    private String ApPaciente;
+    private int idMed;
+    private int dia;
+    private String mes;
+    private int anio;
 
-        // --- INCISO A: ALTA 3 MEDICOS y 9 CONSULTAS ---
-        System.out.println("--- INICIO DE ALTAS ---");
-        
-        // Crear 3 Médicos
-        new Medico(1, "Juan", "Perez", 10).alta();
-        new Medico(2, "Ana", "Gomez", 5).alta();
-        new Medico(3, "Luis", "Lopez", 20).alta();
+    public Consulta(int ci, String nomPaciente, String ApPaciente, int idMed, int dia, String mes, int anio) {
+        this.ci = ci;
+        this.nomPaciente = nomPaciente;
+        this.ApPaciente = ApPaciente;
+        this.idMed = idMed;
+        this.dia = dia;
+        this.mes = mes;
+        this.anio = anio;
+    }
 
-        // Crear Consultas (Asignadas a los médicos)
-        // Medico 1 (Juan Perez) tendrá consultas en Navidad para probar el inciso C
-        new Consulta(101, "Pedro", "Sola", 1, 25, "Diciembre", 2025).alta();
-        new Consulta(102, "Maria", "Luz", 1, 25, "Diciembre", 2025).alta();
-        new Consulta(103, "Jose", "Rui", 1, 10, "Octubre", 2025).alta();
+    public Consulta() {}
 
-        // Medico 2 (Ana Gomez)
-        new Consulta(201, "Carlos", "Vives", 2, 14, "Febrero", 2025).alta();
-        new Consulta(202, "Luisa", "Lane", 2, 14, "Febrero", 2025).alta();
-        new Consulta(203, "Clark", "Kent", 2, 15, "Marzo", 2025).alta();
+    public int getCi() { return ci; }
+    public String getNomPaciente() { return nomPaciente; }
+    public String getApPaciente() { return ApPaciente; }
+    public int getIdMed() { return idMed; }
+    public int getDia() { return dia; }
+    public String getMes() { return mes; }
+    public int getAnio() { return anio; }
 
-        // Medico 3 (Luis Lopez) -> Este será borrado
-        new Consulta(301, "Bruce", "Wayne", 3, 1, "Enero", 2025).alta();
-        new Consulta(302, "Diana", "Prince", 3, 2, "Enero", 2025).alta();
-        new Consulta(303, "Barry", "Allen", 3, 3, "Enero", 2025).alta();
+    public void setCi(int ci) { this.ci = ci; }
+    public void setNomPaciente(String nomPaciente) { this.nomPaciente = nomPaciente; }
+    public void setApPaciente(String ApPaciente) { this.ApPaciente = ApPaciente; }
+    public void setIdMed(int idMed) { this.idMed = idMed; }
+    public void setDia(int dia) { this.dia = dia; }
+    public void setMes(String mes) { this.mes = mes; }
+    public void setAnio(int anio) { this.anio = anio; }
 
-        // --- INCISO C: PROBAR CAMBIO DE FECHA ---
-        System.out.println("\n--- CAMBIANDO NAVIDAD A AÑO NUEVO ---");
-        cons.cambiarNavidad(); 
-        // Revisa los archivos de CI 101 y 102, deben decir 1 de Enero.
-
-        // --- INCISO B: DAR BAJA AL MEDICO 'Luis Lopez' ---
-        System.out.println("\n--- BAJA MEDICO (Y SUS CONSULTAS) ---");
-        cons.darBajaMedico("Luis", "Lopez");
-        // Revisa que los archivos del medico 3 y las consultas 301, 302, 303 hayan desaparecido.
+    @Override
+    public String toString() {
+        return "Consulta{" + "ci=" + ci + ", nomPaciente=" + nomPaciente + 
+               ", ApPaciente=" + ApPaciente + ", idMed=" + idMed + 
+               ", dia=" + dia + ", mes=" + mes + ", anio=" + anio + '}';
     }
 }
-package programa;
+package com.mycompany.fin;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Consultorio {
-    private String consultas; // Ruta carpeta consultas
-    private String medicos;   // Ruta carpeta medicos
+    private String medicos;
+    private String consultas;
 
-    public Consultorio(String consultas, String medicos) {
-        this.consultas = consultas;
-        this.medicos = medicos;
-    }
+    public Consultorio(String med, String con) {
+        this.medicos = med;
+        this.consultas = con;
 
-    // Helpers para cargar listas (Igual a Tienda.java)
-    public ArrayList<Medico> cargarMedicos() {
-        ArrayList<Medico> lista = new ArrayList<>();
-        File folder = new File(medicos);
-        if (folder.listFiles() != null) {
-            for (File f : folder.listFiles()) {
-                if (f.getName().endsWith(".json")) {
-                    Medico m = new Medico();
-                    m.cargar(f.getPath());
-                    lista.add(m);
+        try {
+            File f = new File(this.medicos);
+            if(!f.exists()) {
+                try(FileWriter nuevo = new FileWriter(this.medicos)) {
+                    new Gson().toJson(new ArrayList<Medico>(), nuevo);
                 }
             }
-        }
-        return lista;
-    }
+        } catch(Exception e) { System.out.println(e); }
 
-    public ArrayList<Consulta> cargarConsultas() {
-        ArrayList<Consulta> lista = new ArrayList<>();
-        File folder = new File(consultas);
-        if (folder.listFiles() != null) {
-            for (File f : folder.listFiles()) {
-                if (f.getName().endsWith(".json")) {
-                    Consulta c = new Consulta();
-                    c.cargar(f.getPath());
-                    lista.add(c);
+        try {
+            File f2 = new File(this.consultas);
+            if(!f2.exists()) {
+                try(FileWriter nuevo2 = new FileWriter(this.consultas)) {
+                    new Gson().toJson(new ArrayList<Consulta>(), nuevo2);
                 }
             }
-        }
-        return lista;
+        } catch(Exception e) { System.out.println(e); }
     }
 
-    // --- INCISO B: BAJA POR NOMBRE Y SUS CONSULTAS ---
-    public void darBajaMedico(String nombreX, String apellidoY) {
-        ArrayList<Medico> listaMedicos = cargarMedicos();
-        int idEncontrado = -1;
+    public List<Medico> leerMedicos(){
+        try {
+            File arch = new File(this.medicos);
+            if (!arch.exists()) return new ArrayList<>();
+            Type lista = new TypeToken<List<Medico>>() {}.getType();
+            List<Medico> resultado = new Gson().fromJson(new FileReader(this.medicos), lista);
+            return resultado != null ? resultado : new ArrayList<>();
+        } catch(Exception e) { System.out.println(e); return new ArrayList<>(); }
+    }
 
-        // 1. Buscar al médico
-        for (Medico m : listaMedicos) {
-            if (m.getNombreMed().equals(nombreX) && m.getApellidoMed().equals(apellidoY)) {
-                idEncontrado = m.getIdMed();
-                m.baja(); // Elimina el archivo del médico
-                System.out.println(">> Medico encontrado y eliminado.");
+    public List<Consulta> leerConsutas(){
+        try {
+            File arch = new File(this.consultas);
+            if (!arch.exists()) return new ArrayList<>();
+            Type lista = new TypeToken<List<Consulta>>() {}.getType();
+            List<Consulta> resultado = new Gson().fromJson(new FileReader(this.consultas), lista);
+            return resultado != null ? resultado : new ArrayList<>();
+        } catch(Exception e) { System.out.println(e); return new ArrayList<>(); }
+    }
+
+    public void modificarM(List<Medico> lista){
+        try(FileWriter escritor = new FileWriter(this.medicos)) {
+            new Gson().toJson(lista, escritor);
+        } catch(Exception e) { System.out.println(e); }
+    }
+
+    public void modificarC(List<Consulta> lista){
+        try(FileWriter escritor = new FileWriter(this.consultas)) {
+            new Gson().toJson(lista, escritor);
+        } catch(Exception e) { System.out.println(e); }
+    }
+
+    public void altaMedico(Medico m){
+        List<Medico> todas = this.leerMedicos();
+        todas.add(m);
+        this.modificarM(todas);
+        System.out.println("Médico agregado con éxito");
+    }
+
+    public void altaConsulta(Consulta c){
+        List<Consulta> todas = this.leerConsutas();
+        todas.add(c);
+        this.modificarC(todas);
+        System.out.println("Consulta agregada con éxito");
+    }
+
+    public void bajaMedico(String nombre, String apellido){
+        List<Medico> medicos = this.leerMedicos();
+        List<Consulta> consultas = this.leerConsutas();
+
+        Medico eliminado = null;
+        for(Medico m : medicos) {
+            if(m.getNombreMed().equals(nombre) && m.getApmedico().equals(apellido)) {
+                eliminado = m;
                 break;
             }
         }
 
-        // 2. Eliminación en Cascada (Sus consultas)
-        if (idEncontrado != -1) {
-            ArrayList<Consulta> listaConsultas = cargarConsultas();
-            for (Consulta c : listaConsultas) {
-                if (c.getIdMed() == idEncontrado) {
-                    c.baja(); // Elimina el archivo de la consulta
-                    System.out.println(">> Consulta asociada eliminada.");
+        if(eliminado != null){
+            medicos.remove(eliminado);
+
+            List<Consulta> nuevas = new ArrayList<>();
+            for(Consulta c : consultas){
+                if(c.getIdMed() != eliminado.getIdMedico()){
+                    nuevas.add(c);
                 }
             }
+
+            this.modificarM(medicos);
+            this.modificarC(nuevas);
+
+            System.out.println("Médico y sus consultas eliminadas.");
         } else {
-            System.out.println("Medico no encontrado.");
+            System.out.println("Médico no encontrado.");
         }
     }
 
-    // --- INCISO C: CAMBIAR NAVIDAD A AÑO NUEVO ---
-    public void cambiarNavidad() {
-        ArrayList<Consulta> lista = cargarConsultas();
-        for (Consulta c : lista) {
-            // Verifica si es 25 de Diciembre
-            if (c.getDia() == 25 && c.getMes().equalsIgnoreCase("Diciembre")) {
-                // Actualizar en memoria
-                c.setDia(1);
-                c.setMes("Enero");
-                c.setAnio(c.anio + 1); // Pasamos al siguiente año (lógica opcional pero correcta)
-                
-                // Persistir el cambio (Sobreescribe el archivo)
-                c.alta(); 
-                System.out.println(">> Fecha de consulta actualizada para Año Nuevo.");
+    public void cambia(String m, int d){
+        List<Consulta> consultas = this.leerConsutas();
+        for(Consulta c : consultas){
+            if ((c.getDia() == 25 || c.getDia() == 31) && c.getMes().equals("diciembre")){
+                c.setDia(d);
+                c.setMes(m);
+            }
+        }
+        this.modificarC(consultas);
+        System.out.println("Fechas de consultas modificadas");
+    }
+
+    public void mostrarPacientesPorDia(int dia, String mes){
+        List<Consulta> consultas = this.leerConsutas();
+        System.out.println("Pacientes del " + dia + " de " + mes + ":");
+        for(Consulta c : consultas){
+            if(c.getDia() == dia && c.getMes().equalsIgnoreCase(mes)){
+                System.out.println(c.getNomPaciente() + " " + c.getApPaciente());
             }
         }
     }
 }
-package programa;
-import com.google.gson.Gson;
-import java.io.*;
+package com.mycompany.fin;
 
-public class Consulta {
-    // Atributos del diagrama
-    private int ci;
-    private String nombrePaciente;
-    private String apellidoPaciente;
-    private int idMed;
-    private int dia, mes, anio; // Ojo: diagrama dice mes:String, pero abajo dice int. Usaré int por lógica o String si prefieres. Asumo String según diagrama.
-    private String mesStr; // Ajuste: El diagrama dice "mes:String"
+import java.util.Scanner;
 
-    public Consulta(int ci, String nombre, String apellido, int idMed, int dia, String mes, int anio) {
-        this.ci = ci;
-        this.nombrePaciente = nombre;
-        this.apellidoPaciente = apellido;
-        this.idMed = idMed;
-        this.dia = dia;
-        this.mesStr = mes;
-        this.anio = anio;
-    }
-    public Consulta() {}
+public class Fin {
 
-    public void alta() {
-        // Nombre único: consulta_CI_IDMED.json
-        String ruta = "archivosConsultas/consulta_" + this.ci + "_" + this.idMed + ".json";
-        Gson gson = new Gson();
-        try {
-            new File("archivosConsultas").mkdirs();
-            FileWriter w = new FileWriter(ruta);
-            gson.toJson(this, w);
-            w.close();
-            System.out.println("Consulta agendada para: " + this.apellidoPaciente);
-        } catch (Exception e) {
-            System.out.println("Error alta consulta: " + e);
+    public static void main(String[] args) {
+        Consultorio c = new Consultorio("medicos.json", "consultas.json");
+        Scanner sc = new Scanner(System.in);
+
+        if(c.leerMedicos().isEmpty()) {
+            c.altaMedico(new Medico(1,"Juan","Perez",5));
+            c.altaMedico(new Medico(2,"Ana","Lopez",3));
+            c.altaMedico(new Medico(3,"Luis","Gomez",7));
         }
-    }
 
-    public void baja() {
-        String ruta = "archivosConsultas/consulta_" + this.ci + "_" + this.idMed + ".json";
-        File archivo = new File(ruta);
-        archivo.delete(); // Borrado silencioso
-    }
+        if(c.leerConsutas().isEmpty()) {
+            c.altaConsulta(new Consulta(101,"Carlos","Diaz",1,25,"diciembre",2025));
+            c.altaConsulta(new Consulta(102,"Maria","Diaz",1,10,"enero",2025));
+            c.altaConsulta(new Consulta(103,"Pedro","Ramirez",1,15,"febrero",2025));
 
-    public void cargar(String ruta) {
-        Gson gson = new Gson();
-        try {
-            FileReader r = new FileReader(ruta);
-            Consulta aux = gson.fromJson(r, Consulta.class);
-            this.ci = aux.ci;
-            this.nombrePaciente = aux.nombrePaciente;
-            this.apellidoPaciente = aux.apellidoPaciente;
-            this.idMed = aux.idMed;
-            this.dia = aux.dia;
-            this.mesStr = aux.mesStr;
-            this.anio = aux.anio;
-            r.close();
-        } catch (Exception e) {}
-    }
+            c.altaConsulta(new Consulta(104,"Lucia","Perez",2,25,"diciembre",2025));
+            c.altaConsulta(new Consulta(105,"Sofia","Lopez",2,5,"marzo",2025));
+            c.altaConsulta(new Consulta(106,"Mateo","Gomez",2,31,"diciembre",2025));
 
-    // Getters y Setters para la lógica de Navidad
-    public int getIdMed() { return idMed; }
-    public String getMes() { return mesStr; }
-    public int getDia() { return dia; }
-    public void setDia(int dia) { this.dia = dia; }
-    public void setMes(String mes) { this.mesStr = mes; }
-    public void setAnio(int anio) { this.anio = anio; }
-    
-    @Override
-    public String toString() {
-        return "Consulta{" + "Paciente=" + apellidoPaciente + ", Fecha=" + dia + "/" + mesStr + "}";
+            c.altaConsulta(new Consulta(107,"Valentina","Diaz",3,20,"abril",2025));
+            c.altaConsulta(new Consulta(108,"Daniel","Lopez",3,25,"diciembre",2025));
+            c.altaConsulta(new Consulta(109,"Camila","Gomez",3,15,"mayo",2025));
+        }
+
+        int opcion = -1;
+
+        while(opcion != 0){
+            System.out.println("\n--- MENÚ CONSULTORIO ---");
+            System.out.println("1. Dar de alta médico");
+            System.out.println("2. Dar de alta consulta");
+            System.out.println("3. Dar de baja médico y sus consultas");
+            System.out.println("4. Cambiar fecha de Navidad/Año Nuevo");
+            System.out.println("5. Mostrar pacientes por día");
+            System.out.println("0. Salir");
+            System.out.print("Elija opción: ");
+            opcion = sc.nextInt();
+            sc.nextLine();
+
+            switch(opcion){
+                case 1:
+                    System.out.print("ID Médico: "); int id = sc.nextInt(); sc.nextLine();
+                    System.out.print("Nombre: "); String nombre = sc.nextLine();
+                    System.out.print("Apellido: "); String apellido = sc.nextLine();
+                    System.out.print("Años de experiencia: "); int exp = sc.nextInt(); sc.nextLine();
+                    c.altaMedico(new Medico(id,nombre,apellido,exp));
+                    break;
+
+                case 2:
+                    System.out.print("CI Paciente: "); int ci = sc.nextInt(); sc.nextLine();
+                    System.out.print("Nombre Paciente: "); String nPac = sc.nextLine();
+                    System.out.print("Apellido Paciente: "); String aPac = sc.nextLine();
+                    System.out.print("ID Médico: "); int idMed = sc.nextInt(); sc.nextLine();
+                    System.out.print("Día: "); int dia = sc.nextInt(); sc.nextLine();
+                    System.out.print("Mes: "); String mes = sc.nextLine();
+                    System.out.print("Año: "); int anio = sc.nextInt(); sc.nextLine();
+                    c.altaConsulta(new Consulta(ci,nPac,aPac,idMed,dia,mes,anio));
+                    break;
+
+                case 3:
+                    System.out.print("Nombre Médico a eliminar: "); String nBaja = sc.nextLine();
+                    System.out.print("Apellido Médico a eliminar: "); String aBaja = sc.nextLine();
+                    c.bajaMedico(nBaja,aBaja);
+                    break;
+
+                case 4:
+                    System.out.print("Nuevo mes: "); String nuevoMes = sc.nextLine();
+                    System.out.print("Nuevo día: "); int nuevoDia = sc.nextInt(); sc.nextLine();
+                    c.cambia(nuevoMes,nuevoDia);
+                    break;
+
+                case 5:
+                    System.out.print("Día: "); int diaM = sc.nextInt(); sc.nextLine();
+                    System.out.print("Mes: "); String mesM = sc.nextLine();
+                    c.mostrarPacientesPorDia(diaM,mesM);
+                    break;
+
+                case 0:
+                    System.out.println("Saliendo...");
+                    break;
+
+                default:
+                    System.out.println("Opción inválida");
+            }
+        }
+        sc.close();
     }
 }
-package programa;
-import com.google.gson.Gson;
-import java.io.*;
+package com.mycompany.fin;
 
 public class Medico {
-    // Atributos del diagrama (NO AGREGAR MÁS)
-    private int idMed;
-    private String nombreMed;
-    private String apellidoMed;
-    private int aniosExperiencia;
+    private int idMedico;
+    private String NombreMed;
+    private String Apmedico;
+    private int aniosExp;
 
-    public Medico(int idMed, String nombreMed, String apellidoMed, int aniosExperiencia) {
-        this.idMed = idMed;
-        this.nombreMed = nombreMed;
-        this.apellidoMed = apellidoMed;
-        this.aniosExperiencia = aniosExperiencia;
+    public Medico(int idMedico, String NombreMed, String Apmedico, int aniosExp) {
+        this.idMedico = idMedico;
+        this.NombreMed = NombreMed;
+        this.Apmedico = Apmedico;
+        this.aniosExp = aniosExp;
     }
-    
-    // Constructor vacío necesario para GSON
+
     public Medico() {}
 
-    // --- MÉTODOS DE PERSISTENCIA (Patrón del Profe) ---
+    public int getIdMedico() { return idMedico; }
+    public String getNombreMed() { return NombreMed; }
+    public String getApmedico() { return Apmedico; }
+    public int getAniosExp() { return aniosExp; }
 
-    public void alta() {
-        // Generamos ruta relativa
-        String ruta = "archivosMedicos/medico_" + this.idMed + ".json";
-        Gson gson = new Gson();
-        try {
-            // Aseguramos que la carpeta exista (truco para que no falle)
-            new File("archivosMedicos").mkdirs(); 
-            
-            FileWriter w = new FileWriter(ruta);
-            gson.toJson(this, w);
-            w.close();
-            System.out.println("Medico guardado: " + this.nombreMed);
-        } catch (Exception e) {
-            System.out.println("Error alta medico: " + e);
-        }
-    }
+    public void setIdMedico(int idMedico) { this.idMedico = idMedico; }
+    public void setNombreMed(String NombreMed) { this.NombreMed = NombreMed; }
+    public void setApmedico(String Apmedico) { this.Apmedico = Apmedico; }
+    public void setAniosExp(int aniosExp) { this.aniosExp = aniosExp; }
 
-    public void baja() {
-        String ruta = "archivosMedicos/medico_" + this.idMed + ".json";
-        File archivo = new File(ruta);
-        if (archivo.delete()) {
-            System.out.println("Medico eliminado: " + this.idMed);
-        } else {
-            System.out.println("Error eliminando medico (¿Quizás no existe?)");
-        }
-    }
-
-    public void cargar(String ruta) {
-        Gson gson = new Gson();
-        try {
-            FileReader r = new FileReader(ruta);
-            Medico aux = gson.fromJson(r, Medico.class);
-            // Copiamos datos a this
-            this.idMed = aux.getIdMed();
-            this.nombreMed = aux.getNombreMed();
-            this.apellidoMed = aux.getApellidoMed();
-            this.aniosExperiencia = aux.getAniosExperiencia();
-            r.close();
-        } catch (Exception e) {
-            System.out.println("Error cargar: " + e);
-        }
-    }
-
-    // Getters necesarios para la lógica del Consultorio
-    public int getIdMed() { return idMed; }
-    public String getNombreMed() { return nombreMed; }
-    public String getApellidoMed() { return apellidoMed; }
-    public int getAniosExperiencia() { return aniosExperiencia; }
-}
-public class Main {
-    public static void main(String[] args) {
-        ArchivoABC a = new ArchivoABC();
-
-        // ↳ a) Dar de alta 3 médicos y sus consultas
-        Medico m1 = new Medico(); m1.idMed = 1; m1.nombreMed = "Juan"; m1.apellidoMed = "Paz"; m1.aniosExperiencia = 5;
-        Medico m2 = new Medico(); m2.idMed = 2; m2.nombreMed = "Luis"; m2.apellidoMed = "Roca"; m2.aniosExperiencia = 7;
-        Medico m3 = new Medico(); m3.idMed = 3; m3.nombreMed = "Ana";  m3.apellidoMed = "Diaz"; m3.aniosExperiencia = 10;
-
-        a.altaMedico(m1);
-        a.altaMedico(m2);
-        a.altaMedico(m3);
-
-        Consulta c1 = new Consulta();
-        c1.id = 10; c1.nombrePaciente = "Mario"; c1.apellidoPaciente = "Lopez";
-        c1.dia = 25; c1.mes = 12; c1.anio = 2025; c1.idMed = 1; c1.idCons = 1;
-        a.altaConsulta(c1);
-
-        // ↳ b) Dar de baja al médico con nombre X y apellido Y
-        a.bajaMedico("Luis", "Roca");
-
-        // ↳ c) Cambiar la fecha de consulta de Navidad y año nuevo
-        a.cambiarFechaNavidadYAnoNuevo();
-
-        // ↳ d) (OPCIONAL) Mostrar pacientes de tu cumpleaños
-        a.mostrarPacientesEnMiCumple(10, 4);
-    }
-}
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-import java.io.*;
-import java.util.*;
-
-class ArchivoABC {
-    private final String archivo = "datos.json";
-    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-    // Cargar archivo
-    private Map<String, List<?>> cargar() {
-        try {
-            Reader r = new FileReader(archivo);
-            return gson.fromJson(r, new TypeToken<Map<String, List<?>>>() {}.getType());
-        } catch (Exception e) {
-            Map<String, List<?>> base = new HashMap<>();
-            base.put("medicos", new ArrayList<Medico>());
-            base.put("consultas", new ArrayList<Consulta>());
-            return base;
-        }
-    }
-
-    // Guardar archivo
-    private void guardar(Map<String, List<?>> data) {
-        try (Writer w = new FileWriter(archivo)) {
-            gson.toJson(data, w);
-        } catch (Exception e) { e.printStackTrace(); }
-    }
-
-    // --------------------- ALTA -----------------------------
-    public void altaMedico(Medico m) {
-        var data = cargar();
-        List<Medico> lista = (List<Medico>) data.get("medicos");
-        lista.add(m);
-        guardar(data);
-    }
-
-    public void altaConsulta(Consulta c) {
-        var data = cargar();
-        List<Consulta> lista = (List<Consulta>) data.get("consultas");
-        lista.add(c);
-        guardar(data);
-    }
-
-    // --------------------- BAJA -----------------------------
-    public void bajaMedico(String nombre, String apellido) {
-        var data = cargar();
-        List<Medico> lista = (List<Medico>) data.get("medicos");
-
-        lista.removeIf(m ->
-                m.nombreMed.equalsIgnoreCase(nombre) &&
-                m.apellidoMed.equalsIgnoreCase(apellido)
-        );
-
-        guardar(data);
-    }
-
-    // -------------------- CAMBIO ----------------------------
-    public void cambiarFechaNavidadYAnoNuevo() {
-        var data = cargar();
-        List<Consulta> lista = (List<Consulta>) data.get("consultas");
-
-        for (Consulta c : lista) {
-            if ((c.dia == 25 && c.mes == 12) || (c.dia == 1 && c.mes == 1)) {
-                c.dia = 10;  // ejemplo: moverlos al 10
-            }
-        }
-
-        guardar(data);
-    }
-
-    // OPCIONAL
-    public void mostrarPacientesEnMiCumple(int diaN, int mesN) {
-        var data = cargar();
-        List<Consulta> lista = (List<Consulta>) data.get("consultas");
-
-        for (Consulta c : lista) {
-            if (c.dia == diaN && c.mes == mesN) {
-                System.out.println(c.nombrePaciente + " " + c.apellidoPaciente);
-            }
-        }
+    @Override
+    public String toString() {
+        return "Medico{" + "idMedico=" + idMedico + ", NombreMed=" + NombreMed + 
+               ", Apmedico=" + Apmedico + ", aniosExp=" + aniosExp + '}';
     }
 }
